@@ -1,0 +1,48 @@
+<dashboard>
+	<label>PS requirements</label>
+	<row>
+		<html id="element10">
+			<h1>PS ops requirements</h1>
+			<p>Todo:</p>
+			<p>Scoping requests/activity
+				<ul>
+					<li>how many by date (SFDC)</li>
+					<li>current status and how long in each status (SLA) (SFDC)</li>
+					<li>how many by owner (SFDC)</li>
+					<li>when scoping call set/complete/total duration (SFDC/OA)</li>
+					<li>when work scheduled, have OA push back to SFDC and update scoping request (IT specific) (SFDC/OA)</li>
+					<li>update SFDC with details from NS to show balance of PS on books (IT specific) (SFDC/NetSuite)</li>
+					<li>correlate trainings w/ support cases w/ PS track volume (IT specific) (LMS, SFDC)</li>
+				</ul>
+			</p>
+			<p>PS Dashboards (SFDC, Netsuite)
+				<ul>
+					<li>Revenue by theater and combined (restrict access?) (NetSuite, SFDC)</li>
+					<li>Expenses by theater and combined (IT specific, NetSuite/SFDC?)</li>
+					<li>Margin by theater and combined (CALC)</li>
+					<li>Utilization by theater, individual and combined (OA/SFDC)</li>
+					<li>Attach Rate by theater and combined (SFDC)</li>
+					<li>Bookings by theater and combined (SFDC/NetSuite)</li>
+					<li>Backlog (live number and not need to scrub!) (NetSuite)</li>
+					<li>$0 License Carve Outs (SFDC/NetSuite)</li>
+				</ul>
+			</p>
+			<p>PS Bookings/Pipeline
+				<ul>
+					<li>Opportunities with bookings/sales stage/notification when this changes (SFDC/opportunity)</li>
+					<li>Scoping request attached to sales opportunity - opportunities with PS and no scoping requests - (closed opps) (SFDC)</li>
+					<li>Average deal/license size vs. PS deal size - % ES, % PCI, % VMWARE (SFDC/NetSuite)</li>
+					<li>Have a mechanism to track Services sold and whether there is a PSA? Wondering if we can get a report that shows any deal closed without a PSA…they get put on a list and we hammer the reps to get the PSA completed.</li>
+				</ul>
+			</p>
+			<p>Staffing with Partners / Employees
+				<ul>
+					<li>OA detail, who was staffed and at what project - push to SFDC (IT specific) Geo-locate where are we sending folks/expenses?</li>
+					<li>How did they do? (unknown source)</li>
+					<li>Surveys (unknown source)</li>
+					<li>Skills matrix - who/how/where/etc. (OA)</li>
+				</ul>
+			</p>
+		</html>
+	</row>
+</dashboard>

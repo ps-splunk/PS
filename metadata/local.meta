@@ -1,0 +1,129 @@
+[app/ui]
+owner = admin
+version = 6.0
+modtime = 1374044280.905794000
+
+[app/launcher]
+owner = admin
+version = 6.0
+modtime = 1374044280.910925000
+
+[app/package/check_for_updates]
+version = 6.0
+modtime = 1374044280.914403000
+
+[views/test2]
+version = 5.0.2
+modtime = 1371773405.417078000
+
+[lookups/account_lookup.csv]
+access = read : [ * ], write : [ * ]
+export = system
+owner = nobody
+version = 5.0.2
+modtime = 1372729960.075655000
+
+[nav/default]
+version = 6.0.1
+modtime = 1388789872.181106000
+
+[views/ps_statement_of_work_statistics]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = matty
+version = 6.0
+modtime = 1381260648.423927000
+
+[views/ps_edu_backlog]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = matty
+version = 6.0
+modtime = 1374006905.110511000
+
+[views/ps_ps_backlog]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = matty
+version = 6.0
+modtime = 1377893261.609158000
+
+[views/ps_manager_activity_statistics]
+access = read : [ * ], write : [ admin ]
+owner = matty
+version = 6.0
+modtime = 1374016872.949974000
+
+[views/ps_ps_back_log_2]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = matty
+version = 6.0
+modtime = 1377104122.104613000
+
+[views/backlog_comparison]
+version = 6.0
+modtime = 1377892767.770460000
+
+[views/ps_requirements]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = genti
+version = 6.0
+modtime = 1374882147.244196000
+
+[views/ps_ops]
+owner = genti
+version = 6.0
+modtime = 1377895725.052532000
+
+[lookups/emea_statuses.csv]
+export = none
+owner = jason
+version = 6.0
+modtime = 1378497717.004582000
+
+[props/sfdc/LOOKUP-emea_status_lookup]
+export = none
+owner = jason
+version = 6.0
+modtime = 1378497774.407254000
+
+[views/ps_emea_forecast]
+owner = jason
+version = 6.0
+modtime = 1378692565.330789000
+
+[views/ps_scoping_request_statistics]
+version = 6.0
+modtime = 1385424465.273506000
+
+[views/ps_backlog]
+owner = genti
+version = 6.0
+modtime = 1381342656.431208000
+
+[lookups/backlog.2013.04.csv]
+access = read : [ * ], write : [ admin, splunkps ]
+export = none
+owner = satoshi
+version = 6.0
+modtime = 1381357896.733866000
+
+[views/backlog_dollars]
+access = read : [ * ], write : [ admin, splunkps, user ]
+export = none
+owner = mark
+version = 6.0
+modtime = 1381444088.694681000
+
+[savedsearches/count_by_manager_status]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = genti
+version = 6.0
+modtime = 1382403918.751920000
+
+[savedsearches/piechart_by_region]
+version = 6.0
+modtime = 1382404064.945747000

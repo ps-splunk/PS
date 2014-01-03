@@ -1,0 +1,72 @@
+<dashboard>
+  <label>PS Backlog</label>
+  <description>PS Backlog OLD</description>
+  <row>
+    <single>
+      <title>PS Backlog</title>
+      <searchString>| inputlookup backlog.csv | search Name="*PS-*" | convert timeformat="%m/%e/%Y" mktime("Start Date") as epochtime | eval epochnow=now() | WHERE epochtime&gt;epochnow-46656000 | chart sum("$ Remaining (Auto Populated)") AS Backlog| eval Backlog = tostring(Backlog, "commas") | eval Backlog="$".Backlog</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+      <option name="linkView">search</option>
+    </single>
+  </row>
+  <row>
+    <chart>
+      <title>PS Backlog Last 18 Months</title>
+      <searchString>| inputlookup backlog.csv | search Name="*PS-*" | lookup account_lookup AccountNumber AS Customer | fillnull Sales_Theater__c value="Mismatch SFDC and Netsuite" | convert timeformat="%m/%e/%Y" mktime("Start Date") as _time | eval epochnow=now() | WHERE _time&gt;epochnow-46656000 | convert timeformat="%Y-%m" ctime(_time) AS date | rename "$ Remaining (Auto Populated)" as backlog | eval backlog=backlog/1000000 | chart sum(backlog) AS Backlog over date by Sales_Theater__c</searchString>
+      <earliestTime>$earliest$</earliestTime>
+      <latestTime>$latest$</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+      <option name="charting.legend.placement">bottom</option>
+      <option name="charting.axisTitleX.text">month over month</option>
+      <option name="charting.axisTitleY.text">$ (millions)</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>PS Bookings Last 18 Months</title>
+      <searchString>| inputlookup backlog.csv | search Name="*PS-*" | lookup account_lookup AccountNumber AS Customer | fillnull Sales_Theater__c value="Mismatch SFDC and Netsuite" | convert timeformat="%m/%e/%Y" mktime("Start Date") as _time | eval epochnow=now() | WHERE _time&gt;epochnow-46656000 | rename "Start Date" AS start_date | rex field=start_date "(?&lt;Year&gt;\d{4})" | bucket _time span=1week | timechart span=1week count by Sales_Theater__c</searchString>
+      <option name="charting.axisLabelsY.majorUnit">5</option>
+      <option name="charting.axisTitleX.text">week over week</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.text"># of bookings</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.maximumNumber">35</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisEnd</option>
+      <option name="charting.legend.placement">bottom</option>
+    </chart>
+  </row>
+</dashboard>

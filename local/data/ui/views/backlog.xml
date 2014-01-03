@@ -1,0 +1,162 @@
+<form script="backlog.js" stylesheet="backlog.css">
+  <label>PS Booking Backlog</label>
+  <fieldset submitButton="false" autoRun="true">
+    <input type="text" token="month" searchWhenChanged="true"/>
+    <input type="text" token="sales_theater" searchWhenChanged="true"/>
+    <input type="text" token="sub_theater" searchWhenChanged="true"/>
+    <input type="text" token="sales_district" searchWhenChanged="true"/>
+    <input type="text" token="sub_district" searchWhenChanged="true"/>
+    <input type="text" token="sales_rep" searchWhenChanged="true"/>
+    <input type="dropdown" token="months_ago" searchWhenChanged="true">
+      <label>Months ago:</label>
+      <default>18</default>
+      <populatingSearch fieldForValue="months" fieldForLabel="months" earliest="0" latest="now">
+        <![CDATA[| `backlog_sanitization(backlog.0, 999)` | rare time limit=1 | eval now=now() | convert ctime(now) timeformat="%Y-%m" | rex field=time "(?<year>\d{4})-(?<month>\d{2})" | rex field=now "(?<year_now>\d{4})-(?<month_now>\d{2})" | eval months_ago=(year_now-year)*12+month_now-month | fields months_ago | eval months=mvrange(0, months_ago+1) | mvexpand months]]>
+      </populatingSearch>
+    </input>
+    <input type="text" token="ts_name_wildcard" searchWhenChanged="true">
+      <label>Name (wildcard):</label>
+    </input>
+    <input type="text" token="ts_from_start_date" searchWhenChanged="true">
+      <label>From Start Date</label>
+    </input>
+    <input type="text" token="ts_to_start_date" searchWhenChanged="true">
+      <label>To Start Date</label>
+    </input>
+    <input type="text" token="ts_min_remaining" searchWhenChanged="true">
+      <label>Min $</label>
+    </input>
+    <input type="text" token="ts_max_remaining" searchWhenChanged="true">
+      <label>Max $</label>
+    </input>
+  </fieldset>
+  <row>
+    <single>
+      <title>Total Backlog from $months_ago$ months ago</title>
+      <searchString>| `backlog_sanitization(backlog.0, $months_ago$)` | stats sum(Remaining) AS Remaining | eval Remaining="$"+tostring(Remaining, "commas")</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="linkView">search</option>
+    </single>
+    <single>
+      <title>Total Transactions with Backlog from $months_ago$ months ago</title>
+      <searchString>| `backlog_sanitization(backlog.0, $months_ago$)` | stats count</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="linkView">search</option>
+    </single>
+  </row>
+  <row>
+    <html id="debug">
+      <h2>DEBUG:</h2>
+      <ul>
+        <li>months_ago: $months_ago$</li>
+        <li>ts_name_query: $ts_name_query$</li>
+        <li>ts_sales_rep_query: $ts_sales_rep_query$</li>
+        <li>ts_sales_theater_query: $ts_sales_theater_query$</li>
+        <li>ts_sub_theater_query: $ts_sub_theater_query$</li>
+        <li>ts_sales_district_query: $ts_sales_district_query$</li>
+        <li>ts_sub_district_query: $ts_sub_district_query$</li>
+        <li>ts_name_wildcard: $ts_name_wildcard$</li>
+        <li>ts_from_start_date: $ts_from_start_date$</li>
+        <li>ts_to_start_date: $ts_to_start_date$</li>
+        <li>ts_min_remaining: $ts_min_remaining$</li>
+        <li>ts_max_remaining: $ts_max_remaining$</li>
+      </ul>
+    </html>
+  </row>
+  <row>
+    <html id="ts_other_inputs">
+      <h2>Other inputs</h2>
+      <div>
+        <label>Name:</label>
+        <div id="mv_name_container"/>
+      </div>
+      <div>
+        <label>Sales Rep:</label>
+        <div id="mv_sales_rep_container"/>
+      </div>
+      <div>
+        <label>Sales Theater:</label>
+        <div id="mv_sales_theater_container"/>
+      </div>
+      <div>
+        <label>Sub-Theater:</label>
+        <div id="mv_sub_theater_container"/>
+      </div>
+      <div>
+        <label>Sales District:</label>
+        <div id="mv_sales_district_container"/>
+      </div>
+      <div>
+        <label>Sub-District:</label>
+        <div id="mv_sub_district_container"/>
+      </div>
+    </html>
+  </row>
+  <row>
+    <html>
+      <div id="sunburst" style="width: 100%; height: 1000px;"/>
+    </html>
+  </row>
+  <row>
+    <table id="transaction_search">
+      <title>Transaction Search from $months_ago$ months ago</title>
+      <searchString>
+        <![CDATA[| `backlog_sanitization(backlog.0, $months_ago$)` | where 'Start Date'>="$ts_from_start_date$" AND 'Start Date'<="$ts_to_start_date$" AND Remaining>=$ts_min_remaining$ AND Remaining<=$ts_max_remaining$ | search ($ts_sales_rep_query$) ($ts_sales_theater_query$) ($ts_sub_theater_query$) ($ts_sales_district_query$) ($ts_sub_district_query$) ($ts_name_query$) Name="$ts_name_wildcard$" | eventstats max(Remaining) AS Max_Remaining | eval "Remaining Bar"=Remaining/Max_Remaining*100 | eval "Percent Burned"=100-Remaining/Total*100 | table Name "Start Date" "Sales Rep" "Sales Order" Remaining "Remaining Bar" "SFDC Opportunity" "SFDC Sales Order" "SFDC Ship To Customer" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" Status | foreach Remaining [fieldformat <<FIELD>>="$".tostring(<<FIELD>>, "commas")] | sort - "Start Date"]]>
+      </searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="drilldown">cell</option>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">true</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="count">10</option>
+    </table>
+  </row>
+  <row>
+    <chart id="month_to_month">
+      <title>Change of backlog from $months_ago$ months ago</title>
+      <searchString>| `backlog_sanitization(backlog.0, $months_ago$)` | eval report_key="Current month" | append [| `backlog_sanitization(backlog.1, $months_ago$)` | eval report_key="1 month ago"] | append [| `backlog_sanitization(backlog.2, $months_ago$)` | eval report_key="2 months ago"] | append [| `backlog_sanitization(backlog.3, $months_ago$)` | eval report_key="3 months ago"] | chart sum(Remaining) over time by report_key | table time "3 months ago" "2 months ago" "1 month ago" "Current month"</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.axisTitleX.visibility">collapsed</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">bottom</option>
+      <option name="charting.axisTitleX.text">months</option>
+      <option name="charting.axisTitleY.text">Backlog</option>
+    </chart>
+  </row>
+  <row>
+    <chart id="month_to_month_detail">
+      <title>Backlog for $month$ by Theater</title>
+      <searchString>| `backlog_sanitization(backlog.2013.12, $months_ago$)` | eval report_key="2013-12" | append [| `backlog_sanitization(backlog.2013.11, $months_ago$)` | eval report_key="2013-11"] | append [| `backlog_sanitization(backlog.2013.10, $months_ago$)` | eval report_key="2013-10"] | append [| `backlog_sanitization(backlog.2013.09, $months_ago$)` | eval report_key="2013-09"] | where time="$month$" | chart sum(Remaining) OVER "Sales Theater" by report_key</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="drilldown">none</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+</form>

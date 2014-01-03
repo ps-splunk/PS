@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?><dashboard>
+  <label>Scoping Requests Statistics</label>
+  <description/>
+  <row>
+    <chart>
+      <title>Scoping Requests by Manager and Status</title>
+      <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | chart count(eval(Status__c="Closed")) AS Closed, count(eval(Status__c="In Progress")) AS "In Progress", count(eval(Status__c="New")) AS New, count(eval(Status__c="Open")) AS Open, by manager</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="wrap">true</option>
+      <option name="rowNumbers">false</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">cell</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">bar</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Scoping Request Daily by Owner - Last 30 Days</title>
+      <searchString>sourcetype=sfdc | dedup Name | search IsDeleted = False | eval time=strptime(CreatedDate,"%Y-%m-%d %H:%M:%S") | eval _time=time | eval now=now() | WHERE _time&gt;now-(32*24*60*60) | timechart span=1d count by manager</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+    <chart id="element2">
+      <title>Scoping Request Weekly by Owner - Last 90 Days</title>
+      <searchString>sourcetype=sfdc | dedup Name | search IsDeleted = False | eval time=strptime(CreatedDate,"%Y-%m-%d %H:%M:%S") | eval _time=time | eval now=now() | WHERE _time&gt;now-(92*24*60*60) | timechart span=1w count by manager</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.rangeValues">["0","30","70","100"]</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.gaugeAutoRanges">1</option>
+      <option name="charting.gaugeColors">["84E900","FFE800","BF3030"]</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+      <option name="charting.layout.splitSeries">0</option>
+    </chart>
+  </row>
+  <row>
+    <chart id="element3">
+      <title>Scoping Requests Monthly by Owner - All Time</title>
+      <searchString>sourcetype=sfdc | dedup Name | search IsDeleted = False | eval time=strptime(CreatedDate,"%Y-%m-%d %H:%M:%S") | eval _time=time | timechart span=1mon count by manager</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.chart">column</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="count">10</option>
+      <option name="displayRowNumbers">true</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.rangeValues">["0","30","70","100"]</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.gaugeAutoRanges">1</option>
+      <option name="charting.gaugeColors">["84E900","FFE800","BF3030"]</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+      <option name="charting.layout.splitSeries">0</option>
+    </chart>
+    <chart id="element4">
+      <title>Scoping Requests by Region</title>
+      <searchString>sourcetype=sfdc | dedup Name | search IsDeleted = False | lookup account_lookup AccountID__c | chart count by Geo_Area__c</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.chart">pie</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.stackMode">default</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.placement">right</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart.rangeValues">["0","30","70","100"]</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">true</option>
+      <option name="charting.gaugeAutoRanges">1</option>
+      <option name="charting.gaugeColors">["84E900","FFE800","BF3030"]</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+    </chart>
+  </row>
+</dashboard>

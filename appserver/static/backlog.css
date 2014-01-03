@@ -1,0 +1,32 @@
+#field1, #field2, #field3, #field4, #field5, #field6  {
+    display: none;
+}
+
+td.data-bar-cell {
+    padding: 4px 8px;
+}
+
+td.data-bar-cell .data-bar-wrapper .data-bar {
+    height: 16px;
+    min-width: 1px;
+    background-color: #5479AF;
+}
+
+.fieldset .input, .fieldset .element {
+    margin-left: 10px;
+}
+
+.ui-datepicker-year {
+    width: 60px;
+    margin-bottom: 0px;
+}
+
+.ui-datepicker-month {
+    width: 60px;
+    margin-bottom: 0px;
+    margin-right: 5px;
+}
+
+button.clear_buttons {
+    margin-top: 25px;
+}
