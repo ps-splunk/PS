@@ -25,7 +25,7 @@ modtime = 1372729960.075655000
 
 [nav/default]
 version = 6.0.1
-modtime = 1388789872.181106000
+modtime = 1390011203.631611000
 
 [views/ps_statement_of_work_statistics]
 access = read : [ * ], write : [ admin ]
@@ -127,3 +127,14 @@ modtime = 1382403918.751920000
 [savedsearches/piechart_by_region]
 version = 6.0
 modtime = 1382404064.945747000
+
+[views/bookings]
+version = 6.0.1
+modtime = 1390423550.577704000
+
+[macros/bookings_by_clause%284%29]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = genti
+version = 6.0.1
+modtime = 1390417719.403107000
