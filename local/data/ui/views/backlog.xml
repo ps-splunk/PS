@@ -96,6 +96,7 @@
   </row>
   <row>
     <html>
+      <h2>Backlog by Sales Region</h2>
       <div id="sunburst" style="width: 100%; height: 1000px;"/>
     </html>
   </row>
@@ -116,8 +117,8 @@
   </row>
   <row>
     <chart id="month_to_month">
-      <title>Change of backlog from $months_ago$ months ago</title>
-      <searchString>| `backlog_sanitization(backlog.0, $months_ago$)` | eval report_key="Current month" | append [| `backlog_sanitization(backlog.1, $months_ago$)` | eval report_key="1 month ago"] | append [| `backlog_sanitization(backlog.2, $months_ago$)` | eval report_key="2 months ago"] | append [| `backlog_sanitization(backlog.3, $months_ago$)` | eval report_key="3 months ago"] | chart sum(Remaining) over time by report_key | table time "3 months ago" "2 months ago" "1 month ago" "Current month"</searchString>
+      <title>Change of Backlog from $months_ago$ months ago</title>
+      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | chart sum(Remaining) over time by report_key</searchString>
       <earliestTime>0</earliestTime>
       <latestTime>now</latestTime>
       <option name="charting.axisTitleX.visibility">collapsed</option>
@@ -139,8 +140,8 @@
   </row>
   <row>
     <chart id="month_to_month_detail">
-      <title>Backlog for $month$ by Theater</title>
-      <searchString>| `backlog_sanitization(backlog.2013.12, $months_ago$)` | eval report_key="2013-12" | append [| `backlog_sanitization(backlog.2013.11, $months_ago$)` | eval report_key="2013-11"] | append [| `backlog_sanitization(backlog.2013.10, $months_ago$)` | eval report_key="2013-10"] | append [| `backlog_sanitization(backlog.2013.09, $months_ago$)` | eval report_key="2013-09"] | where time="$month$" | chart sum(Remaining) OVER "Sales Theater" by report_key</searchString>
+      <title>Backlog for $month$ by Theater from $months_ago$ months ago</title>
+      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | where time="$month$" | chart sum(Remaining) OVER "Sales Theater" by report_key</searchString>
       <earliestTime>0</earliestTime>
       <latestTime>now</latestTime>
       <option name="drilldown">none</option>

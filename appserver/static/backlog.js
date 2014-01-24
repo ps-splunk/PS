@@ -24,7 +24,7 @@ require([
     Sunburst
 ) {
     $(function() {
-        //$("#debug").parents("div.dashboard-row").hide();
+        $("#debug").parents("div.dashboard-row").hide();
         $("#field7").find("abbr").remove();
         $("#transaction_search div.panel-head").after('<div class="fieldset">').after('<div class="fieldset">');
         $("#transaction_search div.fieldset:eq(1)").append($("#field8, #field9, #field10, #field11, #field12"));
@@ -34,8 +34,8 @@ require([
             $("#transaction_search div.fieldset:eq(0)").append(input_div);
         });
 
-        $("#transaction_search div.fieldset:eq(0)").prepend('<h5 style="margin-left: 10px;">Restricted:</h5>').append('<button id="clear_restricted" class="clear_buttons">Clear</button>');
-        $("#transaction_search div.fieldset:eq(1)").prepend('<h5 style="margin-left: 10px;">Filtered:</h5>').append('<button id="clear_filtered" class="clear_buttons">Clear</button>');
+        $("#transaction_search div.fieldset:eq(0)").prepend('<h5 style="margin-left: 10px;">Restricted: <button id="clear_restricted">Clear</button></h5>');
+        $("#transaction_search div.fieldset:eq(1)").prepend('<h5 style="margin-left: 10px;">Filtered: <button id="clear_filtered">Clear</button></h5>');
 
         $("#clear_restricted").click(function() {
             $.each(["mv_name", "mv_sales_rep", "mv_sales_theater", "mv_sub_theater", "mv_sales_district", "mv_sub_district"], function(index, element) {
