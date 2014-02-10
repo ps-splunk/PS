@@ -23,58 +23,6 @@ require([
     SimpleSplunkView,
     Sunburst
 ) {
-    $(function() {
-        $("#debug").parents("div.dashboard-row").hide();
-        $("#field7").find("abbr").remove();
-        $("#transaction_search div.panel-head").after('<div class="fieldset">').after('<div class="fieldset">');
-        $("#transaction_search div.fieldset:eq(1)").append($("#field8, #field9, #field10, #field11, #field12"));
-        $("#ts_other_inputs div[id^=mv_]").each(function() {
-            var input_div = $(this).parent();
-            $(input_div).addClass("input splunk-view");
-            $("#transaction_search div.fieldset:eq(0)").append(input_div);
-        });
-
-        $("#transaction_search div.fieldset:eq(0)").prepend('<h5 style="margin-left: 10px;">Restricted: <button id="clear_restricted">Clear</button></h5>');
-        $("#transaction_search div.fieldset:eq(1)").prepend('<h5 style="margin-left: 10px;">Filtered: <button id="clear_filtered">Clear</button></h5>');
-
-        $("#clear_restricted").click(function() {
-            $.each(["mv_name", "mv_sales_rep", "mv_sales_theater", "mv_sub_theater", "mv_sales_district", "mv_sub_district"], function(index, element) {
-                mvc.Components.get(element).val([]);
-            });
-        });
-
-        $("#clear_filtered").click(function() {
-            $("#field8, #field9, #field10, #field11, #field12").each(function() {
-                $(this).find("input").val("");
-            });
-
-            $.each(['ts_name_wildcard', 'ts_from_start_date', 'ts_to_start_date', 'ts_min_remaining', 'ts_max_remaining'], function(index, element) {
-                UnsubmittedTokens.set(element, default_token_values[element]);
-            });
-
-            submit_and_update_url();
-        });
-
-
-        $("#field9 input").datepicker({
-            changeYear: true,
-            changeMonth: true,
-            dateFormat: $.datepicker.W3C,
-            onClose: function(date_text) {
-                $("#field10 input").datepicker("option", "minDate", date_text);
-            }
-        });
-        $("#field10 input").datepicker({
-            changeYear: true,
-            changeMonth: true,
-            dateFormat: $.datepicker.W3C,
-            onClose: function(date_text) {
-                $("#field9 input").datepicker("option", "maxDate", date_text);
-            }
-        });
-
-        $("#ts_other_inputs").parents("div.dashboard-row").remove();
-    });
 
     function submit_and_update_url() {
         SubmittedTokens.set(UnsubmittedTokens.toJSON());
@@ -163,6 +111,57 @@ require([
             $("#ts_max_start_date").text("Latest: N/A");
         }
     }
+
+    $("#debug").parents("div.dashboard-row").hide();
+    $("#field7").find("abbr").remove();
+    $("#transaction_search div.panel-head").after('<div class="fieldset">').after('<div class="fieldset">');
+    $("#transaction_search div.fieldset:eq(1)").append($("#field8, #field9, #field10, #field11, #field12"));
+    $("#ts_other_inputs div[id^=mv_]").each(function() {
+        var input_div = $(this).parent();
+        $(input_div).addClass("input splunk-view");
+        $("#transaction_search div.fieldset:eq(0)").append(input_div);
+    });
+
+    $("#transaction_search div.fieldset:eq(0)").prepend('<h5 style="margin-left: 10px;">Restricted: <button id="clear_restricted">Clear</button></h5>');
+    $("#transaction_search div.fieldset:eq(1)").prepend('<h5 style="margin-left: 10px;">Filtered: <button id="clear_filtered">Clear</button></h5>');
+
+    $("#clear_restricted").click(function() {
+        $.each(["mv_name", "mv_sales_rep", "mv_sales_theater", "mv_sub_theater", "mv_sales_district", "mv_sub_district"], function(index, element) {
+            mvc.Components.get(element).val([]);
+        });
+    });
+
+    $("#clear_filtered").click(function() {
+        $("#field8, #field9, #field10, #field11, #field12").each(function() {
+            $(this).find("input").val("");
+        });
+
+        $.each(['ts_name_wildcard', 'ts_from_start_date', 'ts_to_start_date', 'ts_min_remaining', 'ts_max_remaining'], function(index, element) {
+            UnsubmittedTokens.set(element, default_token_values[element]);
+        });
+
+        submit_and_update_url();
+    });
+
+    $("#field9 input").datepicker({
+        changeYear: true,
+        changeMonth: true,
+        dateFormat: $.datepicker.W3C,
+        onClose: function(date_text) {
+            $("#field10 input").datepicker("option", "minDate", date_text);
+        }
+    });
+
+    $("#field10 input").datepicker({
+        changeYear: true,
+        changeMonth: true,
+        dateFormat: $.datepicker.W3C,
+        onClose: function(date_text) {
+            $("#field9 input").datepicker("option", "maxDate", date_text);
+        }
+    });
+
+    $("#ts_other_inputs").parents("div.dashboard-row").remove();
 
     var sfdc_link = 'https://splunk.my.salesforce.com/';
 
