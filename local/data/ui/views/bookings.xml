@@ -1,0 +1,110 @@
+<form>
+  <label>Bookings</label>
+  <description>Bookings</description>
+  <fieldset autoRun="true" submitButton="false">
+    <input type="dropdown" token="SalesTheater" searchWhenChanged="true">
+      <label>Select a Sales Theater:</label>
+      <prefix/>
+      <suffix/>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForValue="Sales Theater" fieldForLabel="Sales Theater">
+        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"=$Sub-Theater$ "Sales District"="$SalesDistrict$" "Sub-District"=$Sub-District$ | stats count by "Sales Theater"]]>
+      </populatingSearch>
+    </input>
+    <input type="dropdown" token="Sub-Theater" searchWhenChanged="true">
+      <label>Select a Sub-Theater:</label>
+      <prefix/>
+      <suffix/>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForValue="Sub-Theater" fieldForLabel="Sub-Theater">
+        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District"| search "Sales Theater"="$SalesTheater$" "Sales District"="$SalesDistrict$" "Sub-District"=$Sub-District$| stats count by "Sub-Theater"]]>
+      </populatingSearch>
+    </input>
+    <input type="dropdown" token="SalesDistrict" searchWhenChanged="true">
+      <label>Select a Sales District:</label>
+      <prefix/>
+      <suffix/>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForValue="Sales District" fieldForLabel="Sales District">
+        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sub-District"=$Sub-District$| stats count by "Sales District"]]>
+      </populatingSearch>
+    </input>
+    <input type="dropdown" token="Sub-District" searchWhenChanged="true">
+      <label>Select a Sub-District:</label>
+      <prefix/>
+      <suffix/>
+      <default>*</default>
+      <choice value="*">All</choice>
+      <populatingSearch fieldForValue="Sub-District" fieldForLabel="Sub-District">
+        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" | stats count by "Sub-District"]]>
+      </populatingSearch>
+    </input>
+  </fieldset>
+  <row>
+    <single>
+      <title>Total Bookings this period</title>
+      <searchString>| inputlookup bookings.csv  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$" | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="beforeLabel">$</option>
+      <option name="linkView">search</option>
+    </single>
+    <chart>
+      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"</title>
+      <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"| stats sum("Total Price") AS Total by "Account Name"</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.chart">pie</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+  <row>
+    <chart>
+      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$" over time</title>
+      <searchString>| inputlookup bookings.csv | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"  `bookings_by_clause($SalesTheater$,$Sub-Theater$,$SalesDistrict$,$Sub-District$)` | bucket span=1w time | chart sum("Total Price") over time by token | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="charting.chart">column</option>
+      <option name="charting.axisTitleX.visibility">visible</option>
+      <option name="charting.axisTitleY.visibility">visible</option>
+      <option name="charting.axisX.scale">linear</option>
+      <option name="charting.axisY.scale">linear</option>
+      <option name="charting.chart.nullValueMode">gaps</option>
+      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+      <option name="charting.chart.stackMode">stacked</option>
+      <option name="charting.chart.style">shiny</option>
+      <option name="charting.drilldown">all</option>
+      <option name="charting.layout.splitSeries">0</option>
+      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+      <option name="charting.legend.placement">right</option>
+    </chart>
+  </row>
+  <row>
+    <table>
+      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"</title>
+      <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"| stats sum("Total Price") AS Total values("Sales Theater") AS "Sales Theater" values("Sub-Theater") as "Sub-Theater" values("Sales District") AS "Sales District" values("Sub-District")  AS "Sub-District" by "Account Name" | table "Account Name", "Sales Theater", "Sub-Theater", "Sales District", "Sub-District", Total | sort -Total</searchString>
+      <earliestTime>0</earliestTime>
+      <latestTime>now</latestTime>
+      <option name="wrap">true</option>
+      <option name="displayRowNumbers">true</option>
+      <option name="dataOverlayMode">none</option>
+      <option name="drilldown">row</option>
+      <option name="count">10</option>
+      <option name="rowNumbers">true</option>
+    </table>
+  </row>
+</form>

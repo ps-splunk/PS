@@ -2,16 +2,8 @@
   <view name="requirements" default='true'/>
   <view name="flashtimeline" />
   <view name="ps_scoping_request_statistics"/>
-  <view name="ps_statement_of_work_statistics" />
-  <view name="ps_manager_activity_statistics" />
-  <collection label="PS Backlog Views">
-  	<view name="backlog" />    
-  	<view name="ps_backlog" />
-  	<view name="ps_ps_back_log_2" />
-    <view name="backlog_comparison" />
-    <view name="backlog_dollars" />
+  <view name="backlog" />
+  <view name="bookings" />
+  <collection label="more views here in the future">
   </collection>
-  <view name="ps_edu_backlog" />
-  <view name="ps_emea_forecast" />
-  <view name="dashboard_live" default='true' />
 </nav>
