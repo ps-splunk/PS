@@ -118,7 +118,7 @@
   <row>
     <chart id="month_to_month">
       <title>Change of Backlog from $months_ago$ months ago</title>
-      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | chart sum(Remaining) over time by report_key</searchString>
+      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.3, 18)` | eventstats max("Start Date") as report_key] | chart sum(Remaining) over time by report_key</searchString>
       <earliestTime>0</earliestTime>
       <latestTime>now</latestTime>
       <option name="charting.axisTitleX.visibility">collapsed</option>
@@ -141,7 +141,7 @@
   <row>
     <chart id="month_to_month_detail">
       <title>Backlog for $month$ by Theater from $months_ago$ months ago</title>
-      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | where time="$month$" | chart sum(Remaining) OVER "Sales Theater" by report_key</searchString>
+      <searchString>| `backlog_sanitization(backlog.0, 18)` | eventstats max("Start Date") as report_key | append [| `backlog_sanitization(backlog.1, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.2, 18)` | eventstats max("Start Date") as report_key] | append [| `backlog_sanitization(backlog.3, 18)` | eventstats max("Start Date") as report_key] | where time="$month$" | chart sum(Remaining) OVER "Sales Theater" by report_key</searchString>
       <earliestTime>0</earliestTime>
       <latestTime>now</latestTime>
       <option name="drilldown">none</option>
