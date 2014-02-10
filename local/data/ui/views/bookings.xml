@@ -1,110 +1,416 @@
 <form>
   <label>Bookings</label>
-  <description>Bookings</description>
+  <description>This is a PS Bookings Dashboard (weekly snapshot)</description>
   <fieldset autoRun="true" submitButton="false">
-    <input type="dropdown" token="SalesTheater" searchWhenChanged="true">
-      <label>Select a Sales Theater:</label>
-      <prefix/>
-      <suffix/>
-      <default>*</default>
-      <choice value="*">All</choice>
-      <populatingSearch fieldForValue="Sales Theater" fieldForLabel="Sales Theater">
-        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"=$Sub-Theater$ "Sales District"="$SalesDistrict$" "Sub-District"=$Sub-District$ | stats count by "Sales Theater"]]>
-      </populatingSearch>
-    </input>
-    <input type="dropdown" token="Sub-Theater" searchWhenChanged="true">
-      <label>Select a Sub-Theater:</label>
-      <prefix/>
-      <suffix/>
-      <default>*</default>
-      <choice value="*">All</choice>
-      <populatingSearch fieldForValue="Sub-Theater" fieldForLabel="Sub-Theater">
-        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District"| search "Sales Theater"="$SalesTheater$" "Sales District"="$SalesDistrict$" "Sub-District"=$Sub-District$| stats count by "Sub-Theater"]]>
-      </populatingSearch>
-    </input>
-    <input type="dropdown" token="SalesDistrict" searchWhenChanged="true">
-      <label>Select a Sales District:</label>
-      <prefix/>
-      <suffix/>
-      <default>*</default>
-      <choice value="*">All</choice>
-      <populatingSearch fieldForValue="Sales District" fieldForLabel="Sales District">
-        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sub-District"=$Sub-District$| stats count by "Sales District"]]>
-      </populatingSearch>
-    </input>
-    <input type="dropdown" token="Sub-District" searchWhenChanged="true">
-      <label>Select a Sub-District:</label>
-      <prefix/>
-      <suffix/>
-      <default>*</default>
-      <choice value="*">All</choice>
-      <populatingSearch fieldForValue="Sub-District" fieldForLabel="Sub-District">
-        <![CDATA[| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" | stats count by "Sub-District"]]>
-      </populatingSearch>
+    <input type="dropdown" token="lookup" searchWhenChanged="true">
+      <choice value="bookings.csv">Present Quarter</choice>
+      <choice value="bookings_last.csv">Previous Quarter</choice>
+      <choice value="bookings_year.csv">Present Year</choice>
+      <choice value="bookings_lastyear.csv">Previous Year</choice>
     </input>
   </fieldset>
   <row>
-    <single>
-      <title>Total Bookings this period</title>
-      <searchString>| inputlookup bookings.csv  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$" | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
-      <earliestTime>0</earliestTime>
-      <latestTime>now</latestTime>
-      <option name="beforeLabel">$</option>
-      <option name="linkView">search</option>
-    </single>
-    <chart>
-      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"</title>
-      <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"| stats sum("Total Price") AS Total by "Account Name"</searchString>
-      <earliestTime>0</earliestTime>
-      <latestTime>now</latestTime>
-      <option name="charting.chart">pie</option>
-      <option name="charting.axisTitleX.visibility">visible</option>
-      <option name="charting.axisTitleY.visibility">visible</option>
-      <option name="charting.axisX.scale">linear</option>
-      <option name="charting.axisY.scale">linear</option>
-      <option name="charting.chart.nullValueMode">gaps</option>
-      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-      <option name="charting.chart.stackMode">stacked</option>
-      <option name="charting.chart.style">shiny</option>
-      <option name="charting.drilldown">all</option>
-      <option name="charting.layout.splitSeries">0</option>
-      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-      <option name="charting.legend.placement">right</option>
-    </chart>
+    <panel>
+      <single>
+        <title>Total Bookings this period</title>
+        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="beforeLabel">$</option>
+        <option name="linkView">search</option>
+        <drilldown>
+          <unset token="Theater"/>
+          <unset token="SubTheater"/>
+          <unset token="District"/>
+          <unset token="SubDistrict"/>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showDistrict"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
+      </single>
+    </panel>
+    <panel>
+      <table>
+        <title>Bookings by Theater</title>
+        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | stats sum("Total Price") AS Total by "Sales Theater" | rename "Sales Theater" AS Theater | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <drilldown>
+          <set token="Theater">$row.Theater$</set>
+          <unset token="SubTheater"/>
+          <unset token="District"/>
+          <unset token="SubDistrict"/>
+          <set token="showTheater">$row.Theater$</set>
+          <unset token="showSubTheater"/>
+          <unset token="showDistrict"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
+      </table>
+    </panel>
+    <panel>
+      <table depends="$showTheater$">
+        <title>Bookings by $submitted:Theater$</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">6</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showSubTheater$">
+        <title>Bookings by $submitted:Theater$ : $submitted:SubTheater$</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">6</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showDistrict$">
+        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$"   | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">6</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showSubDistrict$">
+        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$ : $submitted:SubDistrict$</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">6</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+    </panel>
   </row>
   <row>
-    <chart>
-      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$" over time</title>
-      <searchString>| inputlookup bookings.csv | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"  `bookings_by_clause($SalesTheater$,$Sub-Theater$,$SalesDistrict$,$Sub-District$)` | bucket span=1w time | chart sum("Total Price") over time by token | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
-      <earliestTime>0</earliestTime>
-      <latestTime>now</latestTime>
-      <option name="charting.chart">column</option>
-      <option name="charting.axisTitleX.visibility">visible</option>
-      <option name="charting.axisTitleY.visibility">visible</option>
-      <option name="charting.axisX.scale">linear</option>
-      <option name="charting.axisY.scale">linear</option>
-      <option name="charting.chart.nullValueMode">gaps</option>
-      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-      <option name="charting.chart.stackMode">stacked</option>
-      <option name="charting.chart.style">shiny</option>
-      <option name="charting.drilldown">all</option>
-      <option name="charting.layout.splitSeries">0</option>
-      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-      <option name="charting.legend.placement">right</option>
-    </chart>
+    <panel>
+      <chart depends="$Theater$">
+        <title>Bookings for $submitted:Theater$</title>
+        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" | stats sum("Total Price") AS Total by "Sub-Theater" | rename "Sub-Theater" AS SubTheater</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubTheater">$row.SubTheater$</set>
+          <unset token="District"/>
+          <unset token="SubDistrict"/>
+          <set token="showSubTheater">$row.SubTheater$</set>
+          <unset token="showTheater"/>
+          <unset token="showDistrict"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart depends="$SubTheater$">
+        <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$</title>
+        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" | stats sum("Total Price") AS Total by "Sales District" | rename "Sales District" AS District</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="District">$row.District$</set>
+          <unset token="SubDistrict"/>
+          <set token="showDistrict">$row.District$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <chart depends="$District$">
+        <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
+        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" "Sales District"="$District$" | stats sum("Total Price") AS Total by "Sub-District" | rename "Sub-District" AS SubDistrict</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubDistrict">$row.SubDistrict$</set>
+          <set token="showSubDistrict">$row.SubDistrict$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showDistrict"/>
+        </drilldown>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">pie</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
   </row>
   <row>
-    <table>
-      <title>Bookings for "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"</title>
-      <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$SalesTheater$" "Sub-Theater"="$Sub-Theater$" "Sales District"="$SalesDistrict$" "Sub-District"="$Sub-District$"| stats sum("Total Price") AS Total values("Sales Theater") AS "Sales Theater" values("Sub-Theater") as "Sub-Theater" values("Sales District") AS "Sales District" values("Sub-District")  AS "Sub-District" by "Account Name" | table "Account Name", "Sales Theater", "Sub-Theater", "Sales District", "Sub-District", Total | sort -Total</searchString>
-      <earliestTime>0</earliestTime>
-      <latestTime>now</latestTime>
-      <option name="wrap">true</option>
-      <option name="displayRowNumbers">true</option>
-      <option name="dataOverlayMode">none</option>
-      <option name="drilldown">row</option>
-      <option name="count">10</option>
-      <option name="rowNumbers">true</option>
-    </table>
+    <panel>
+      <chart depends="$showTheater$">
+        <title>Bookings Over Time</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | bucket span=1w time | chart sum("Total Price") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart depends="$showSubTheater$">
+        <title>Bookings Over Time</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$"  | bucket span=1w time | chart sum("Total Price") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart depends="$showDistrict$">
+        <title>Bookings Over Time</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$"  | bucket span=1w time | chart sum("Total Price") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+      <chart depends="$showSubDistrict$">
+        <title>Bookings Over Time</title>
+        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$"  | bucket span=1w time | chart sum("Total Price") over time by "Account Name" | rename "Account Name" AS AccountName | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
   </row>
 </form>
