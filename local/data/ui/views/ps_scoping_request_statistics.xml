@@ -2,29 +2,46 @@
   <label>Scoping Requests Statistics</label>
   <description/>
   <row>
-    <chart>
-      <title>Scoping Requests by Manager and Status</title>
-      <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | chart count(eval(Status__c="Closed")) AS Closed, count(eval(Status__c="In Progress")) AS "In Progress", count(eval(Status__c="New")) AS New, count(eval(Status__c="Open")) AS Open, by manager</searchString>
-      <earliestTime>0</earliestTime>
-      <latestTime>now</latestTime>
-      <option name="wrap">true</option>
-      <option name="rowNumbers">false</option>
-      <option name="dataOverlayMode">none</option>
-      <option name="drilldown">cell</option>
-      <option name="charting.axisTitleX.visibility">visible</option>
-      <option name="charting.axisTitleY.visibility">visible</option>
-      <option name="charting.axisX.scale">linear</option>
-      <option name="charting.axisY.scale">linear</option>
-      <option name="charting.chart">bar</option>
-      <option name="charting.chart.nullValueMode">gaps</option>
-      <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-      <option name="charting.chart.stackMode">stacked</option>
-      <option name="charting.chart.style">shiny</option>
-      <option name="charting.drilldown">all</option>
-      <option name="charting.layout.splitSeries">0</option>
-      <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-      <option name="charting.legend.placement">right</option>
-    </chart>
+    <panel>
+      <chart>
+        <title>Scoping Requests by Manager and Status</title>
+        <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | chart count(eval(Status__c="Closed")) AS Closed, count(eval(Status__c="In Progress")) AS "In Progress", count(eval(Status__c="New")) AS New, count(eval(Status__c="Open")) AS Open, by manager</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <drilldown>
+          <set token="manager">$row.manager$</set>
+          <set token="status">$click.name2$</set>
+        </drilldown>
+      </chart>
+    </panel>
+    <panel>
+      <table depends="$manager$">
+        <title>Bookings by $submitted:Theater$</title>
+        <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | search manager="$manager$" Status__c=$status$ | stats count by Name, Status__c Id | rename Status__c AS Status</searchString>
+        <option name="fields">Name,Status</option>
+        <drilldown>
+          <set token="Id">$row.Id$</set>
+          <link target="_blank">https://splunk.my.salesforce.com/$Id$</link>
+        </drilldown>
+      </table>
+    </panel>
   </row>
   <row>
     <chart>
@@ -41,10 +58,16 @@
       <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
       <option name="charting.chart.stackMode">stacked</option>
       <option name="charting.chart.style">shiny</option>
-      <option name="charting.drilldown">all</option>
+      <option name="charting.drilldown">none</option>
       <option name="charting.layout.splitSeries">0</option>
       <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
       <option name="charting.legend.placement">right</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+      <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+      <option name="charting.axisTitleY2.visibility">visible</option>
+      <option name="charting.axisY2.enabled">false</option>
+      <option name="charting.axisY2.scale">inherit</option>
+      <option name="charting.chart.rangeValues">[]</option>
     </chart>
     <chart id="element2">
       <title>Scoping Request Weekly by Owner - Last 90 Days</title>

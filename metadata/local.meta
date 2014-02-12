@@ -138,7 +138,7 @@ export = none
 owner = genti
 version = 6.0.1
 modtime = 1390417719.403107000
-=======
+
 [views/backlog]
 version = 6.0.1
 modtime = 1392062744.039830000
@@ -162,3 +162,10 @@ modtime = 1392062543.410232000
 [macros/backlog_sanitization%282%29]
 version = 6.0.1
 modtime = 1392063612.739813000
+
+[views/genti_backlog]
+access = read : [ * ], write : [ admin ]
+export = none
+owner = genti
+version = 6.1
+modtime = 1392145451.797368000
