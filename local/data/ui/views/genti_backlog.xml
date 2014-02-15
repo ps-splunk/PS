@@ -4,22 +4,16 @@
   <fieldset autoRun="true" submitButton="false">
     <html>
       <div>
-        <h4>Url: no params</h4>
+        <h4>Instructions</h4>
         <ol>
-          <li>Click here to unset all parameters:<a href="genti_backlog">Click</a>
-          </li>
-          <li>Choose your desired backlog range</li>
-          <li>Choose a comparison backlog</li>
+          <li><a href="genti_backlog">Click here</a> to unset all parameters!</li>
+          <li>Choose your desired backlog range (defaults January 1st 2014)</li>
+          <li>Click Apply, Voila!</li>
         </ol>
       </div>
     </html>
     <input type="time" token="time1" searchWhenChanged="true">
       <label>Backlog range</label>
-      <default>0</default>
-    </input>
-    <input type="dropdown" token="lookup" searchWhenChanged="true">
-      <choice value="backlog.csv">Comparing Backlog</choice>
-      <label>Choose a Comparing Backlog</label>
     </input>
   </fieldset>
   <row>
@@ -29,16 +23,6 @@
         <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$| stats sum("$ Remaining (Auto Populated)") AS Total | eval Total=tostring(Total, "commas")</searchString>
         <option name="beforeLabel">$</option>
         <option name="linkView">search</option>
-        <drilldown>
-          <unset token="Theater"/>
-          <unset token="SubTheater"/>
-          <unset token="District"/>
-          <unset token="SubDistrict"/>
-          <unset token="showTheater"/>
-          <unset token="showSubTheater"/>
-          <unset token="showDistrict"/>
-          <unset token="showSubDistrict"/>
-        </drilldown>
       </single>
     </panel>
     <panel>
@@ -324,9 +308,18 @@
     <panel>
       <chart depends="$showTheater$">
         <title>Backlog Over Time</title>
-        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sales Theater"="$showTheater$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sales Theater"="$showTheater$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y") | rename "Sub-Theater" as SubTheater</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubTheater">$click.name2$</set>
+          <unset token="District"/>
+          <unset token="SubDistrict"/>
+          <set token="showSubTheater">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showDistrict"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -342,16 +335,24 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
+        <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
       <chart depends="$showSubTheater$">
         <title>Backlog Over Time</title>
-        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sub-Theater"="$showSubTheater$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sub-Theater"="$showSubTheater$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y") | rename "Sales District" AS District</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="District">$click.name2$</set>
+          <unset token="SubDistrict"/>
+          <set token="showDistrict">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -367,16 +368,23 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
+        <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
       <chart depends="$showDistrict$">
         <title>Backlog Over Time</title>
-        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sales District"="$showDistrict$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup backlog.csv | lookup account "SFDC Ship To Customer" AS "Ship To Customer SFDC ID" | rename "Start Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sales District"="$showDistrict$"  | bucket span=1w time | chart sum("$ Remaining (Auto Populated)") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y") | rename "Sub-District" as SubDistrict</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubDistrict">$click.name2$</set>
+          <set token="showSubDistrict">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -392,7 +400,7 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
+        <option name="charting.drilldown">all</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
