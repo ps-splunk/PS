@@ -2,38 +2,35 @@
   <label>Bookings</label>
   <description>This is a PS Bookings Dashboard (weekly snapshot)</description>
   <fieldset autoRun="true" submitButton="false">
-    <input type="dropdown" token="lookup" searchWhenChanged="true">
-      <choice value="bookings.csv">Present Quarter</choice>
-      <choice value="bookings_last.csv">Previous Quarter</choice>
-      <choice value="bookings_year.csv">Present Year</choice>
-      <choice value="bookings_lastyear.csv">Previous Year</choice>
+    <html>
+      <div>
+        <h4>Instructions</h4>
+        <ol>
+          <li><a href="bookings">Click here</a> to unset all parameters!</li>
+          <li>Choose your desired bookings range (defaults January 1st 2014)</li>
+          <li>Voila!</li>
+        </ol>
+      </div>
+    </html>
+    <input type="time" token="time1" searchWhenChanged="true">
+      <label>Bookings range</label>
     </input>
   </fieldset>
   <row>
     <panel>
       <single>
         <title>Total Bookings this period</title>
-        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="beforeLabel">$</option>
         <option name="linkView">search</option>
-        <drilldown>
-          <unset token="Theater"/>
-          <unset token="SubTheater"/>
-          <unset token="District"/>
-          <unset token="SubDistrict"/>
-          <unset token="showTheater"/>
-          <unset token="showSubTheater"/>
-          <unset token="showDistrict"/>
-          <unset token="showSubDistrict"/>
-        </drilldown>
       </single>
     </panel>
     <panel>
       <table>
         <title>Bookings by Theater</title>
-        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | stats sum("Total Price") AS Total by "Sales Theater" | rename "Sales Theater" AS Theater | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total by "Sales Theater" | rename "Sales Theater" AS Theater | addcoltotals labelfield="Theater" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <drilldown>
           <set token="Theater">$row.Theater$</set>
           <unset token="SubTheater"/>
@@ -49,7 +46,7 @@
     <panel>
       <table depends="$showTheater$">
         <title>Bookings by $submitted:Theater$</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv| rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -88,7 +85,7 @@
       </table>
       <table depends="$showSubTheater$">
         <title>Bookings by $submitted:Theater$ : $submitted:SubTheater$</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sub-Theater"="$showSubTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -127,7 +124,7 @@
       </table>
       <table depends="$showDistrict$">
         <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$"   | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -166,7 +163,7 @@
       </table>
       <table depends="$showSubDistrict$">
         <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$ : $submitted:SubDistrict$</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | sort -Total| eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -209,7 +206,7 @@
     <panel>
       <chart depends="$Theater$">
         <title>Bookings for $submitted:Theater$</title>
-        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" | stats sum("Total Price") AS Total by "Sub-Theater" | rename "Sub-Theater" AS SubTheater</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total by "Sub-Theater" | rename "Sub-Theater" AS SubTheater</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -244,7 +241,7 @@
     <panel>
       <chart depends="$SubTheater$">
         <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$</title>
-        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" | stats sum("Total Price") AS Total by "Sales District" | rename "Sales District" AS District</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total by "Sales District" | rename "Sales District" AS District</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -278,7 +275,7 @@
     <panel>
       <chart depends="$District$">
         <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
-        <searchString>| inputlookup $lookup$  | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" "Sales District"="$District$" | stats sum("Total Price") AS Total by "Sub-District" | rename "Sub-District" AS SubDistrict</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" "Sales District"="$District$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total by "Sub-District" | rename "Sub-District" AS SubDistrict</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -313,9 +310,18 @@
     <panel>
       <chart depends="$showTheater$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | bucket span=1w time | chart sum("Total Price") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | bucket span=1w time | chart sum("Total Price") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubTheater">$click.name2$</set>
+          <unset token="District"/>
+          <unset token="SubDistrict"/>
+          <set token="showSubTheater">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showDistrict"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -331,16 +337,23 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
       <chart depends="$showSubTheater$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$"  | bucket span=1w time | chart sum("Total Price") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="District">$click.name2$</set>
+          <unset token="SubDistrict"/>
+          <set token="showDistrict">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showSubDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -356,16 +369,22 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
       <chart depends="$showDistrict$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$"  | bucket span=1w time | chart sum("Total Price") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
+        <drilldown>
+          <set token="SubDistrict">$click.name2$</set>
+          <set token="showSubDistrict">$click.name2$</set>
+          <unset token="showTheater"/>
+          <unset token="showSubTheater"/>
+          <unset token="showDistrict"/>
+        </drilldown>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
         <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
         <option name="charting.axisTitleX.visibility">visible</option>
@@ -381,14 +400,13 @@
         <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
         <option name="charting.chart.stackMode">stacked</option>
         <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">none</option>
         <option name="charting.layout.splitSeries">0</option>
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
       <chart depends="$showSubDistrict$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup $lookup$ | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$"  | bucket span=1w time | chart sum("Total Price") over time by "Account Name" | rename "Account Name" AS AccountName | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Account Name" | rename "Account Name" AS AccountName | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>

@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><dashboard>
+<?xml version="1.0" encoding="utf-8"?>
+<dashboard>
   <label>Scoping Requests Statistics</label>
   <description/>
   <row>
@@ -33,13 +34,21 @@
     </panel>
     <panel>
       <table depends="$manager$">
-        <title>Bookings by $submitted:Theater$</title>
-        <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | search manager="$manager$" Status__c=$status$ | stats count by Name, Status__c Id | rename Status__c AS Status</searchString>
-        <option name="fields">Name,Status</option>
+        <title>$status$ Scoping Requests by $submitted:manager$</title>
+        <searchString>sourcetype=sfdc  | dedup Name | search IsDeleted = False  | fillnull value="Wrong Manager" manager | search manager="$manager$" Status__c="$status$" | stats count by Name, Status__c Id Opportunity__c | rex field=Opportunity__c "(?&lt;OppId&gt;\w{15})"  | lookup opportunity Id AS OppId | lookup account "SFDC Ship To Customer" AS AccountId | rename Status__c AS Status "Sales Theater" AS Theater, "Sub-Theater" AS SubTheater, "Sales District" AS District, "Sub-District" AS SubDistrict</searchString>
+        <earliestTime>$earliest$</earliestTime>
+        <latestTime>$latest$</latestTime>
+        <option name="fields">Name,Status,Theater,SubTheater,District,SubDistrict</option>
         <drilldown>
           <set token="Id">$row.Id$</set>
           <link target="_blank">https://splunk.my.salesforce.com/$Id$</link>
         </drilldown>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">8</option>
+        <fields>["Name","Status","Theater","SubTheater","District","SubDistrict"]</fields>
       </table>
     </panel>
   </row>

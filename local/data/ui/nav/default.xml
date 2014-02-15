@@ -1,10 +1,10 @@
 <nav>
   <view name="requirements" default='true'/>
-  <view name="flashtimeline" />
   <view name="ps_scoping_request_statistics"/>
   <view name="backlog" />
-  <view name="bookings" />
-  <a href="/app/PS/genti_backlog?form.time1.earliest=1388563200&form.time1.latest=now">Genti Backlog</a>
-  <collection label="more views here in the future">
+  <a href="/app/PS/bookings?form.time1.earliest=1388563200">Bookings</a>
+  <a href="/app/PS/genti_backlog?form.time1.earliest=1388563200">Genti Backlog</a>
+  <collection label="Other">
+      <view name="flashtimeline" />
   </collection>
 </nav>
