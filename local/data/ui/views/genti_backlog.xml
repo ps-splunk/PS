@@ -1,12 +1,13 @@
 <form script="timerange_panels.js" stylesheet="timerange_panels.css">
-  <label>Backlog</label>
+  <label>Genti Backlog</label>
   <description>This is a PS Backlog Dashboard (monthly snapshot)</description>
   <fieldset autoRun="true" submitButton="false">
     <html>
       <div>
         <h4>Instructions</h4>
         <ol>
-          <li><a href="genti_backlog">Click here</a> to unset all parameters!</li>
+          <li>
+            <a href="genti_backlog">Click here</a>to unset all parameters!</li>
           <li>Choose your desired backlog range (defaults January 1st 2014)</li>
           <li>Click Apply, Voila!</li>
         </ol>

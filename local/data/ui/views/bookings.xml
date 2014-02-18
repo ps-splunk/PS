@@ -6,7 +6,8 @@
       <div>
         <h4>Instructions</h4>
         <ol>
-          <li><a href="bookings">Click here</a> to unset all parameters!</li>
+          <li>
+            <a href="bookings">Click here</a>to unset all parameters!</li>
           <li>Choose your desired bookings range (defaults January 1st 2014)</li>
           <li>Voila!</li>
         </ol>
@@ -20,7 +21,7 @@
     <panel>
       <single>
         <title>Total Bookings this period</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales Theater" AS Theater "Close Date" as date | eval Theater=if(Theater="","Missing SFDC Info",Theater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total | eval Total=tostring(Total, "commas")</searchString>
         <earliestTime>0</earliestTime>
         <latestTime>now</latestTime>
         <option name="beforeLabel">$</option>
@@ -30,7 +31,7 @@
     <panel>
       <table>
         <title>Bookings by Theater</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total by "Sales Theater" | rename "Sales Theater" AS Theater | addcoltotals labelfield="Theater" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales Theater" AS Theater "Close Date" as date | eval Theater=if(Theater="","Missing SFDC Info",Theater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total by Theater | addcoltotals labelfield="Theater" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
         <drilldown>
           <set token="Theater">$row.Theater$</set>
           <unset token="SubTheater"/>
@@ -43,170 +44,12 @@
         </drilldown>
       </table>
     </panel>
-    <panel>
-      <table depends="$showTheater$">
-        <title>Bookings by $submitted:Theater$</title>
-        <searchString>| inputlookup bookings.csv| rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
-        <earliestTime>0</earliestTime>
-        <latestTime>now</latestTime>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">column</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.rangeValues">[]</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="wrap">true</option>
-        <option name="rowNumbers">false</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
-        <option name="count">6</option>
-        <drilldown>
-          <condition field="Opportunity ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="Account ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="*"/>
-        </drilldown>
-      </table>
-      <table depends="$showSubTheater$">
-        <title>Bookings by $submitted:Theater$ : $submitted:SubTheater$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "Sub-Theater"="$showSubTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
-        <earliestTime>0</earliestTime>
-        <latestTime>now</latestTime>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">column</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.rangeValues">[]</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="wrap">true</option>
-        <option name="rowNumbers">false</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
-        <option name="count">6</option>
-        <drilldown>
-          <condition field="Opportunity ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="Account ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="*"/>
-        </drilldown>
-      </table>
-      <table depends="$showDistrict$">
-        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
-        <earliestTime>0</earliestTime>
-        <latestTime>now</latestTime>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">column</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.rangeValues">[]</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="wrap">true</option>
-        <option name="rowNumbers">false</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
-        <option name="count">6</option>
-        <drilldown>
-          <condition field="Opportunity ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="Account ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="*"/>
-        </drilldown>
-      </table>
-      <table depends="$showSubDistrict$">
-        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$ : $submitted:SubDistrict$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(AccountId) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
-        <earliestTime>0</earliestTime>
-        <latestTime>now</latestTime>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">false</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">column</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.rangeValues">[]</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">stacked</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-        <option name="wrap">true</option>
-        <option name="rowNumbers">false</option>
-        <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
-        <option name="count">6</option>
-        <drilldown>
-          <condition field="Opportunity ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="Account ID">
-            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
-          </condition>
-          <condition field="*"/>
-        </drilldown>
-      </table>
-    </panel>
   </row>
   <row>
     <panel>
       <chart depends="$Theater$">
         <title>Bookings for $submitted:Theater$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total by "Sub-Theater" | rename "Sub-Theater" AS SubTheater</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales Theater" AS Theater "Sub-Theater" AS SubTheater "Close Date" as date | eval SubTheater=if(SubTheater="","Missing SFDC Info",SubTheater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search Theater="$Theater$" | stats sum("Total Price") AS Total by SubTheater</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -241,7 +84,7 @@
     <panel>
       <chart depends="$SubTheater$">
         <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | stats sum("Total Price") AS Total by "Sales District" | rename "Sales District" AS District</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sub-Theater" AS SubTheater "Sales District" AS District "Close Date" as date | eval District=if(District="","Missing SFDC Info",District) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "SubTheater"="$SubTheater$" | stats sum("Total Price") AS Total by District</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -275,7 +118,7 @@
     <panel>
       <chart depends="$District$">
         <title>Bookings for $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$Theater$" "Sub-Theater"="$SubTheater$" "Sales District"="$District$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | stats sum("Total Price") AS Total by "Sub-District" | rename "Sub-District" AS SubDistrict</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales District" AS District "Sub-District" AS SubDistrict "Close Date" as date | eval SubDistrict=if(SubDistrict="","Missing SFDC Info",SubDistrict) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search District="$District$" | stats sum("Total Price") AS Total by SubDistrict</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -310,7 +153,7 @@
     <panel>
       <chart depends="$showTheater$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales Theater"="$showTheater$"  | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | bucket span=1w time | chart sum("Total Price") over time by "Sub-Theater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales Theater" AS Theater "Sub-Theater" AS SubTheater "Close Date" as date | eval SubTheater=if(SubTheater="","Missing SFDC Info",SubTheater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search Theater="$showTheater$" | bucket span=1w time | chart sum("Total Price") over time by "SubTheater" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -343,7 +186,7 @@
       </chart>
       <chart depends="$showSubTheater$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-Theater"="$showSubTheater$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Sales District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sub-Theater" AS SubTheater "Sales District" AS District "Close Date" as date | eval District=if(District="","Missing SFDC Info",District) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search SubTheater="$showSubTheater$" | bucket span=1w time | chart sum("Total Price") over time by District | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -375,7 +218,7 @@
       </chart>
       <chart depends="$showDistrict$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sales District"="$showDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Sub-District" | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sales District" AS District "Sub-District" AS SubDistrict "Close Date" as date | eval SubDistrict=if(SubDistrict="","Missing SFDC Info",SubDistrict) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search District="$showDistrict$" | bucket span=1w time | chart sum("Total Price") over time by SubDistrict | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <drilldown>
@@ -406,7 +249,7 @@
       </chart>
       <chart depends="$showSubDistrict$">
         <title>Bookings Over Time</title>
-        <searchString>| inputlookup bookings.csv | lookup opportunity Id AS "Opportunity ID" | lookup account "SFDC Ship To Customer" AS AccountId | fillnull value="NA" "Sales Theater" "Sub-Theater" "Sales District" "Sub-District" | search "Sub-District"="$showSubDistrict$" | rename "Close Date" as date | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$  | bucket span=1w time | chart sum("Total Price") over time by "Account Name" | rename "Account Name" AS AccountName | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
+        <searchString>| inputlookup bookings.csv | rename "Sub-District" AS SubDistrict "Account Name" AS AccountName "Close Date" as date | eval AccountName=if(AccountName="","Missing SFDC Info",AccountName) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search SubDistrict="$showSubDistrict$" | bucket span=1w time | chart sum("Total Price") over time by AccountName | fieldformat time=strftime(time,"%m/%d/%Y")</searchString>
         <earliestTime>$earliest$</earliestTime>
         <latestTime>$latest$</latestTime>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -429,6 +272,166 @@
         <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
         <option name="charting.legend.placement">right</option>
       </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table depends="$showTheater$">
+        <title>Bookings by $submitted:Theater$</title>
+        <searchString>| inputlookup bookings.csv | rename "Sales Theater" AS Theater "Close Date" as date | eval Theater=if(Theater="","Missing SFDC Info",Theater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search Theater="$showTheater$"| stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(Account ID) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">20</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showSubTheater$">
+        <title>Bookings by $submitted:Theater$ : $submitted:SubTheater$</title>
+        <searchString>| inputlookup bookings.csv | rename "Sub-Theater" AS SubTheater "Close Date" as date | eval SubTheater=if(SubTheater="","Missing SFDC Info",SubTheater) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "SubTheater"="$showSubTheater$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(Account ID) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">20</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showDistrict$">
+        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$</title>
+        <searchString>| inputlookup bookings.csv | rename "Sales District" AS District "Close Date" as date | eval District=if(District="","Missing SFDC Info",District) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search District="$showDistrict$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(Account ID) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">20</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
+      <table depends="$showSubDistrict$">
+        <title>Bookings by  $submitted:Theater$ : $submitted:SubTheater$ : $submitted:District$ : $submitted:SubDistrict$</title>
+        <searchString>| inputlookup bookings.csv | rename "Sub-District" AS SubDistrict "Close Date" as date | eval SubDistrict=if(SubDistrict="","Missing SFDC Info",SubDistrict) | eval time=strptime(date,"%m/%d/%Y") | WHERE time &gt; $time1.earliest$ | search "SubDistrict"="$showSubDistrict$"  | stats sum("Total Price") AS Total values(Opportunity ID) AS "Opportunity ID" values(Account ID) AS "Account ID" by "Account Name" | addcoltotals labelfield="Account Name" label=Total | sort -Total | eval Total=tostring(Total, "commas") | eval Total="$".Total</searchString>
+        <earliestTime>0</earliestTime>
+        <latestTime>now</latestTime>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">false</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.rangeValues">[]</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+        <option name="wrap">true</option>
+        <option name="rowNumbers">false</option>
+        <option name="dataOverlayMode">none</option>
+        <option name="drilldown">cell</option>
+        <option name="count">20</option>
+        <drilldown>
+          <condition field="Opportunity ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="Account ID">
+            <link target="_blank">https://splunk.my.salesforce.com/$click.value2$</link>
+          </condition>
+          <condition field="*"/>
+        </drilldown>
+      </table>
     </panel>
   </row>
 </form>

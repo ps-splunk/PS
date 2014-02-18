@@ -2,7 +2,7 @@
   <view name="requirements" default='true'/>
   <view name="ps_scoping_request_statistics"/>
   <view name="backlog" />
-  <a href="/app/PS/bookings?form.time1.earliest=1388563200">Bookings</a>
+  <a href="/app/PS/bookings?form.time1.earliest=1388563200">Genti Bookings</a>
   <a href="/app/PS/genti_backlog?form.time1.earliest=1388563200">Genti Backlog</a>
   <collection label="Other">
       <view name="flashtimeline" />
